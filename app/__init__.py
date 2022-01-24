@@ -141,11 +141,12 @@ def init_db():
         except Exception as err:
             utils.system_logging(f'Error saving existing financials:\n{err}', exception=True)
 
-        controllers.TasksController.launch_task(
-            'handle_unhandled_messages',
-            "Handle unanswered messages",
-            meta={'startup': True},  # Data to be set on meta of task
-        )
+        # TODO
+        # controllers.TasksController.launch_task(
+        #    'handle_unhandled_messages',
+        #    "Handle unanswered messages",
+        #    meta={'startup': True},  # Data to be set on meta of task
+        # )
     except Exception as e:
         # Log any error that occurs
         utils.system_logging(e, exception=True)

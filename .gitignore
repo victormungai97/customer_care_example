@@ -1,0 +1,45 @@
+# virtual environment
+venv/
+
+# Miscellaneous
+*.class
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+**/__pycache__/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Secret config
+instance/
+instance/config.py
+
+# Upload folder
+app/static/uploads/
+
+# App logs
+logs/
+**.log
+**.log.**
+
+# Environment variable
+*.env
+*.flaskenv
+settings.py
+
+# Database files
+**.db
+**.db_journal
+**.sqlite
+
+# Redis files
+**.rdb
+**.rdb.**

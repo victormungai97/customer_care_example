@@ -15,7 +15,7 @@ SERVER_NAME = os.environ.get("SERVER_NAME")
 
 class Config(object):
     # Put any configurations common across all environments
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or 'sqlite:///database.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', '').replace('postgres://', 'postgresql://') or 'sqlite:///database.db'
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SESSION_COOKIE_NAME = "session"
     DEBUG = False
@@ -66,6 +66,8 @@ class Config(object):
     IS_PYTHON_ANYWHERE = os.environ.get("IS_PYTHON_ANYWHERE") is not None
     # For email address validation
     REAL_EMAIL_API_KEY = os.environ.get("REAL_EMAIL_API_KEY")
+    # Indicates whether to log to stdout or to a file
+    LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
 
 
 class DevelopmentConfig(Config):

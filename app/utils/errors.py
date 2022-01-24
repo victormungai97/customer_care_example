@@ -75,32 +75,39 @@ def system_logging(msg, exception=True, log_file='infinite_pay.log'):
     When this application runs on a production server, these log entries will tell you when the server was restarted.
     :param: logs_folder = The folder that will contain the log file
     """
-    # Get and secure the log file
-    from werkzeug.utils import secure_filename
-    if not log_file or type(log_file) != str:
-        log_file = 'infinite_pay.log'
-    log_file = secure_filename(log_file)
-
-    # if log folder does not exist, create it
-    logs_folder = app.config.get("LOG_FOLDER", "./logs")
-    if not os.path.isdir(logs_folder):
-        os.makedirs(logs_folder)
-
     if exception:
         if app.debug:
             print(msg)
         # Retry up to 3 times, with configurable intervals between retries
-        app.task_queue.enqueue_call(task_config['send_background_error_email'], timeout=3600, retry=Retry(3, 10))
+        # TODO app.task_queue.enqueue_call(task_config['send_background_error_email'], timeout=3600, retry=Retry(3, 10))
 
+    # Log message to database
     from ..views import Sockets
     Sockets.add_log_message({'level': "exception" if exception else "info", 'message': msg, 'source': "system"})
 
-    app.logger.addHandler(set_logger(logs_folder + f'/{log_file}'))
-    app.logger.setLevel(logging.INFO)
-    if exception:
-        app.logger.exception(msg)
+    # If on an ephemeral system e.g. Heroku, log to stdout
+    if app.config['LOG_TO_STDOUT']:
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(logging.INFO)
+        app.logger.addHandler(stream_handler)
     else:
-        app.logger.info(msg)
+        # Get and secure the log file
+        from werkzeug.utils import secure_filename
+        if not log_file or type(log_file) != str:
+            log_file = 'infinite_pay.log'
+        log_file = secure_filename(log_file)
+
+        # if log folder does not exist, create it
+        logs_folder = app.config.get("LOG_FOLDER", "./logs")
+        if not os.path.isdir(logs_folder):
+            os.makedirs(logs_folder)
+
+        app.logger.addHandler(set_logger(logs_folder + f'/{log_file}'))
+        app.logger.setLevel(logging.INFO)
+        if exception:
+            app.logger.exception(msg)
+        else:
+            app.logger.info(msg)
 
 
 def check_failed_rq_jobs(queue_name='find_tasks', delete_job=False):

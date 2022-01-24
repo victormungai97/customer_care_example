@@ -1,0 +1,104 @@
+{
+  "receipt": [
+    {
+      "created_at": "2021-12-22 01:00:00-03:00",
+      "description": "bank's API is unavailable",
+      "merchant_id": 558392,
+      "status": "failed",
+      "value": 177.4
+    },
+    {
+      "created_at": "2021-12-22 01:00:00-03:00",
+      "description": "OK",
+      "merchant_id": 384923,
+      "status": "success",
+      "value": 1240
+    }
+  ],
+  "sales": [
+    {
+      "chip_id": "CHIP37648",
+      "created_at": "2021-12-01 12:00:00-03:00",
+      "description": "in the delivery step",
+      "id_sale": 123456,
+      "merchant_id": 384923,
+      "status": "in progress"
+    },
+    {
+      "chip_id": "CHIP37650",
+      "created_at": "2021-12-05 14:00:00-03:00",
+      "description": "in the delivery step",
+      "id_sale": 123457,
+      "merchant_id": 395023,
+      "status": "in progress"
+    },
+    {
+      "chip_id": "CHIP37651",
+      "created_at": "2021-12-07 17:30:00-03:00",
+      "description": "in the delivery step",
+      "id_sale": 123458,
+      "merchant_id": 849583,
+      "status": "in progress"
+    },
+    {
+      "chip_id": "CHIP37649",
+      "created_at": "2021-02-01 12:00:00-03:00",
+      "description": "delivered",
+      "id_sale": 34853,
+      "merchant_id": 530364,
+      "status": "done"
+    },
+    {
+      "chip_id": "CHIP37652",
+      "created_at": "2021-02-01 12:00:00-03:00",
+      "description": "delivered",
+      "id_sale": 34854,
+      "merchant_id": 558392,
+      "status": "done"
+    }
+  ],
+  "transaction": [
+    {
+      "created_at": "2021-12-21 13:00:00-03:00",
+      "merchant_id": 558392,
+      "transaction_id": 374290,
+      "value": 127.4
+    },
+    {
+      "created_at": "2021-12-21 12:00:00-03:00",
+      "merchant_id": 558392,
+      "transaction_id": 374289,
+      "value": 50
+    },
+    {
+      "created_at": "2021-05-21 13:24:04-03:00",
+      "merchant_id": 530364,
+      "transaction_id": 374291,
+      "value": 2339.49
+    },
+    {
+      "created_at": "2021-05-21 17:32:04-03:00",
+      "merchant_id": 530364,
+      "transaction_id": 374292,
+      "value": 1493
+    },
+    {
+      "created_at": "2021-12-21 18:32:04-03:00",
+      "merchant_id": 384923,
+      "transaction_id": 374293,
+      "value": 390
+    },
+    {
+      "created_at": "2021-12-21 19:01:04-03:00",
+      "merchant_id": 384923,
+      "transaction_id": 374294,
+      "value": 455
+    },
+    {
+      "created_at": "2021-12-21 20:01:04-03:00",
+      "merchant_id": 384923,
+      "transaction_id": 374295,
+      "value": 395
+    }
+  ]
+}

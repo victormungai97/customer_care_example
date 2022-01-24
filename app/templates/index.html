@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        /* Chat containers */
+        .container {
+            border: 2px solid #dedede;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        /* Darker chat container */
+        .darker {
+            border-color: #ccc;
+            background-color: #ddd;
+        }
+
+        /* Clear floats */
+        .container::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* Style images */
+        .container img {
+            float: left;
+            max-width: 60px;
+            width: 100%;
+            margin-right: 20px;
+            border-radius: 50%;
+        }
+
+        /* Style the right image */
+        .container img.right {
+            float: right;
+            margin-left: 20px;
+            margin-right: 0;
+        }
+
+        /* Style time text */
+        .time-right {
+            float: right;
+            color: #aaa;
+            margin-top: 45px;
+        }
+
+        /* Style time text */
+        .time-left {
+            float: left;
+            color: #999;
+        }
+
+        /* Visibility class */
+        .show {
+            display: block;
+        }
+
+        /* Invisibility class */
+        .hide {
+            display: none;
+        }
+    </style>
+    <title>Infinite Pay Support</title>
+</head>
+<body>
+<div class="show" id="loading">Establishing connection...</div>
+<div class="hide" id="body">
+    <div id="chat"></div>
+    <form id="emit" method="POST" action='#'>
+        <label for="chat-input" style="display:none;"></label>
+        <input type="text" name="chat-input" id="chat-input" placeholder="Write a Message">
+        <input type="submit" value="Send">
+    </form>
+    <p>
+        Average ping/pong latency: <b><span id="ping-pong"></span>ms</b>
+    </p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript">
+    const uuidURL = "https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js";
+
+    function addScript(src, callback) {
+        const scriptElement = document.createElement('script');
+        scriptElement.src = src;
+        scriptElement.async = true;
+        scriptElement.onload = callback;
+        document.body.appendChild(scriptElement);
+    }
+
+    function createChatMessage(message, client, datetime) {
+        if (typeof client !== "boolean") client = false
+
+        // Create parent container div
+        const parent = document.createElement("div")
+        parent.classList.add("container")
+        if (!client) parent.classList.add("darker")
+
+        // Create icon that represents user
+        const icon = document.createElement("img")
+        icon.src = `https://avatars.dicebear.com/api/${client ? "human" : "bottts"}/${client ? "client" : "bot"}.svg`
+        icon.alt = client ? "User" : "Bot";
+        if (!client) icon.classList.add('right')
+        icon.style.width = "100%"
+        parent.appendChild(icon)
+
+        // Create message paragraph(s)
+        if (message && typeof message === "string") {
+            const paragraph = document.createElement('p')
+            const paragraphs = message.split('\n')
+            if (paragraphs.length === 1) {
+                paragraph.textContent = paragraphs[0]
+            } else {
+                for (let i = 0; i < paragraphs.length; i++) {
+                    paragraph.innerHTML += `${paragraphs[i]}<br>`
+                }
+            }
+            if (!client) paragraph.style.float = "right"
+            parent.appendChild(paragraph)
+        }
+
+        // Show timestamp
+        const timestamp = document.createElement('span')
+        timestamp.classList.add(`time-${!client ? 'right' : 'left'}`)
+        timestamp.textContent = datetime || (new Date(Date.now())).toString()
+        if (!client && !((window.innerWidth <= 800) && (window.innerHeight <= 600))) timestamp.style.marginRight = "-35px"
+        parent.appendChild(timestamp)
+
+        document.getElementById("chat").appendChild(parent)
+    }
+
+    // Hide loading message and instead show the main body
+    const hideLoading = () => {
+        document.getElementById('loading').classList.remove('show')
+        document.getElementById('loading').classList.add('hide')
+
+        document.getElementById('body').classList.add('show')
+        document.getElementById('body').classList.remove('hide')
+
+        // scroll entire body to bottom
+        let scrollingElement = (document.scrollingElement || document.body);
+        scrollingElement.scrollTop = scrollingElement.scrollHeight;
+    }
+
+    // Show loading message and thus hide the main body
+    const showLoading = () => {
+        document.getElementById('loading').classList.add('show')
+        document.getElementById('loading').classList.remove('hide')
+
+        document.getElementById('body').classList.remove('show')
+        document.getElementById('body').classList.add('hide')
+    }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+<script type="text/javascript">
+    // Connect to the Socket.IO server.
+    // The connection URL has the following format, relative to the current page:
+    //     http[s]://<domain>:<port>[/<namespace>]
+    const socket = io();
+    $(document).ready(function () {
+
+        // Event handler for new connections.
+        // The callback function is invoked when a connection with the
+        // server is established.
+        socket.on('connect', function () {
+            let uID = localStorage.unique_id;
+
+            if (!uID) {
+                addScript(uuidURL, function () {
+                    uID = uuidv4()
+                    socket.emit('setup', {id: uID}); // Function to request client's previous messages
+                    localStorage.unique_id = uID;
+                });
+            } else {
+                for (let script in document.getElementsByTagName('script')) {
+                    if (script.src === uuidURL) script.parentNode.removeChild(script)
+                }
+                socket.emit('setup', {id: uID}); // Function to request client's previous messages
+            }
+        });
+
+        // Handler for setup completion.
+        // This is called when a user has loaded the webpage and
+        // a result has been received from server after initial connection
+        socket.on('setup complete', function (data, callback) {
+            if (localStorage.unique_id === data.id) {
+                const parent = document.getElementById("chat")
+                while (parent.firstChild) {
+                    parent.firstChild.remove()
+                }
+                const messages = data.messages;
+                if (messages && Array.isArray(messages)) {
+                    messages.forEach(function (item) {
+                        createChatMessage(item.message, item.is_client, item.timestamp)
+                    })
+                }
+
+                hideLoading()
+
+                if (callback) callback()
+            }
+        });
+
+        // Event handler for server sent data.
+        // The callback function is invoked whenever the server emits data
+        // to the client. The data is then displayed in the "Received"
+        // section of the page.
+        socket.on("received message", (data, callback) => {
+            createChatMessage(data.message, false, data.timestamp)
+
+            hideLoading()
+
+            if (callback) callback()
+        });
+
+        // Interval function that tests message latency by sending a "ping"
+        // message. The server then responds with a "pong" message and the
+        // round trip time is measured.
+        let ping_pong_times = [];
+        let start_time;
+        window.setInterval(function () {
+            start_time = (new Date).getTime();
+            socket.emit('my_ping');
+        }, 1000);
+
+        // Handler for the "pong" message. When the pong is received, the
+        // time from the ping is stored, and the average of the last 30
+        // samples is average and displayed.
+        socket.on('my_pong', function () {
+            let latency = (new Date).getTime() - start_time;
+            ping_pong_times.push(latency);
+            ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
+            let sum = 0;
+            for (let i = 0; i < ping_pong_times.length; i++)
+                sum += ping_pong_times[i];
+            $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
+        });
+    });
+
+    document.getElementById("emit").addEventListener('submit', function (event) {
+        event.preventDefault();
+        document.getElementById("chat-input").blur()
+        const msg = document.getElementById("chat-input").value;
+        document.getElementById("emit").reset()
+        socket.emit("add message", {message: msg, id: localStorage.unique_id});
+        showLoading()
+        createChatMessage(msg, true, (new Date(Date.now())).toString());
+    });
+</script>
+</body>
+</html>
